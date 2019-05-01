@@ -20,29 +20,38 @@ require(car)
 
 ###################################### Data analysis ######################################
 
-################### Code 1: Load data set
-### Loading data
-hospita <- read.table(file.choose(), header = T) # Search file "hospitalization.dat"
+################### Code 1: Load dataset and Header
+### Load dataset
+hospita <- read.table("data/hospitalization.dat", header = T)
 hospita$cost <- hospita$cost/1000000
-head(hospita)
-surgery <- read.table(file.choose(), header = T) # Search file "surgery.dat"
+surgery <- read.table("data/surgery.dat", header = T)
 surgery$cost <- surgery$cost/1000000
-print(head(surgery))
+### Header
+kable(cbind(head(hospita), round(head(surgery), 3)),
+      caption = "Header of dataset
+      \\label{tab:header}",
+      "latex", booktabs = T) %>%
+  add_header_above(c("Hospitalization" = 2, 
+                     "General Surgery" = 2)) %>%
+  column_spec(column = 2, border_right = T) %>%
+  kable_styling(latex_options = c("striped", "hold_position"))
 
-################### Code 2: Pareto chart and plot hospitalization frequencies
-### Pareto chart hospitalization
+################### Code 2: Pareto chart and table for hospitalization frequencies
+### Pareto chart
 parhosp <- pareto.chart(table(hospita$year), 
                         main = "Hospitalization", las = 1)
+### Table
 kable(parhosp,
       caption = "Distribution records hospitalization per year
       \\label{tab:frech}",
       "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position"))
 
-################### Code 3: Pareto chart and plot general surgery frequencies
-### Pareto chart general surgery
+################### Code 3: Pareto chart and table for general surgery frequencies
+### Pareto chart
 parsurg <- pareto.chart(table(surgery$year),
                         main = "General surgery", las = 1)
+### Table
 kable(parsurg,
       caption = "Distribution records general surgery per year
       \\label{tab:frecs}",
@@ -53,35 +62,38 @@ kable(parsurg,
 par(mfrow=c(2,2))
 ### Histogram
 hist(hospita$cost, freq = F, xlab = "Costs", 
-     main = "(a) Histogram of \n hospitalization costs")
+     main = "(a) Hospitalization costs \n Histogram", col = "lightblue")
 ### Box-plot
-boxplot(hospita$cost~factor(hospita$year), col = blues.colors(6), 
-        main = "(a) Box-plot of \n hospitalization services",
+boxplot(hospita$cost~factor(hospita$year), col = rainbow(6, s = 0.6), 
+        main = "(a) Hospitalization services \n Box-plot",
         xlab = "Costs", ylab = "Years", horizontal = T, las=1)
 ### Density
 plot(density(hospita$cost), lwd = 2,
-     main = "(c) Density of \n hospitalization costs")
+     main = "(c) Hospitalization costs \n Density")
+polygon(density(hospita$cost), col = "lightblue")
 ### Scatterplot
-plot(hospita$year,hospita$cost, ylab="Costs", 
-     xlab = "Year", main = "(d) Year vs Cost \n hospitalization")
+plot(hospita$year,hospita$cost, ylab="Costs", xlab = "Year", 
+     main = "(d) Hospitalization services \n Year vs Cost")
 
 ################### Code 5: Histogram, Box-plot, Density and Scatterplot general surgery individual cost
 par(mfrow=c(2,2))
 ### Histogram
 hist(surgery$cost, freq = F, xlab = "Costs",
-     main = "(a) Histogram of \n general surgery costs")
+     main = "(a) General surgery costs \n Histogram",
+     col = "lightblue")
 ### Box-plot
-boxplot(surgery$cost~factor(surgery$year), col = blues.colors(6), 
-        main = "(b) Box-plot of \n hospitalization services", 
+boxplot(surgery$cost~factor(surgery$year), col = rainbow(6, s = 0.6), 
+        main = "(b)  General surgery services \n Box-plot", 
         xlab = "Costs", ylab = "Years", horizontal = T, las=1)
 ### Density
 plot(density(surgery$cost), lwd = 2, 
-     main = "(c) Density of \n general surgery costs")
+     main = "(c) General surgery costs \n Density")
+polygon(density(surgery$cost), col = "lightblue")
 ### Scatterplot
-plot(surgery$year,surgery$cost, ylab="Costs",
-     xlab = "Year", main = "(d) Year vs Cost \n general surgery")
+plot(surgery$year,surgery$cost, ylab="Costs", xlab = "Year",
+     main = "(d) General surgery services \n Year vs Cost")
 
-################### Code 6: Best fit with gamlss for frequencies of hospitalization services
+################### Code 6: Best fit with GAMLSS for frequencies of hospitalization services
 ### The adjustment is made
 FitN_hosp1 <- fitDist(y = table(hospita$year), type = "counts")
 ### Estimation of second and third distribution with best fit
@@ -95,6 +107,8 @@ kable(rbind(FitN_hosp1$fits[1:5]),
   kable_styling(latex_options = c("striped", "hold_position"))
 
 ################### Code 7: Statistical measurements of hospitalization frequencies
+### Estimation of mean, variance, skewness and excess kurtosis
+#### Mean
 ### Estimation of mean, variance, skewness and excess kurtosis
 #### Mean
 MeanNhEmp <- mean(table(hospita$year))
@@ -143,7 +157,7 @@ kable(cbind(data.frame(Dist = c("Empirical", "PIG", "GPO", "BNI")),
       caption = "Statistical measurements of hospitalization
       frequencies \\label{tab:StatisticsNh}",
       "latex", booktabs = T) %>%
-  kable_styling(latex_options = c("striped", "hold_position")) 
+  kable_styling(latex_options = c("striped", "hold_position"))  
 
 ################### Code 8:Adjustment cumulative frequencies of hospitalization
 ### Empirical vs Theorical cumulative distribution function
@@ -160,7 +174,7 @@ curve(pNBI(x, mu = FitN_hosp3$mu, sigma = FitN_hosp3$sigma),
 grid()
 legend("bottomright", lty = 1, col = c("black", "blue", "green",
                                        "red"), legend = c("Cumulative empirical distribution",
-                                                          "Poisson-Inverse Gaussian", "Generalised Poisson",
+                                                          "Poisson-Inverse Gaussian", "Generalized Poisson",
                                                           "Negative Binomial type I"), lwd = 2)
 
 ################### Code 9: Goodness-of-fit tests for hospitalization frequencies
@@ -267,7 +281,9 @@ kable(cbind(data.frame(Dist = c("Empirical", "DEL", "PIG", "BNI")),
       "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position")) 
 
+
 ################### Code 12: Adjustment cumulative frequencies of general surgery
+### Empirical vs Theorical cumulative distribution function
 plot(ecdf(table(surgery$year)), lwd = 3,
      xlab = "Sample quantiles of frequencies of general surgery", 
      main = "Adjustment cumulative frequencies of general surgery")
@@ -281,7 +297,7 @@ curve(pGPO(x, mu = FitN_surg3$mu, sigma = FitN_surg3$sigma),
 grid()
 legend("bottomright", lty = 1, col = c("black", "blue", "green",
                                        "red"), legend = c("Cumulative empirical distribution",
-                                                          "Poisson-Inverse Gaussian", "Generalised Poisson",
+                                                          "Poisson-Inverse Gaussian", "Generalized Poisson",
                                                           "Negative Binomial type I"), lwd = 2)
 
 ################### Code 13: Goodness-of-fit for tests general surgery frequencies
@@ -340,41 +356,51 @@ abline(v = 16, col = "red", lwd = 2, lty = 2)
 ###################################### Tail index with Hill plot for hospitalization ######################################
 
 ################### Code 16: Hill, AltHill, SmooHill and AltSmooHill for hospitalizacion service
-### Hill, AltHill, SmooHill and AltSmooHill
-par(mfrow = c(2, 2))
-hillplot(data = hospita$cost, alpha = 0.05, legend.loc = "top",
-         hill.type = "Hill", ylim = c(0, 2))
-title(main = "(a)                   ", line = 3.3)
-hillplot(data = hospita$cost, alpha = 0.05, legend.loc = "top",
-         hill.type = "Hill", ylim = c(0, 2), x.theta = TRUE)
-title(main = "(b)                        ", line = 3.3)
-hillplot(data = hospita$cost, alpha = 0.05, legend.loc = "top",
-         hill.type = "SmooHill", ylim = c(0, 2))
-title(main = "(c)                             ", line = 3.3)
-hillplot(data = hospita$cost, alpha = 0.05, legend.loc = "top",
-         hill.type = "SmooHill", ylim = c(0, 2), x.theta = TRUE)
-title(main = "(d)                                 ", line = 3.3)
+par(mfrow = c(2, 2), cex = 0.7)
+### Hill Plot
+hillplot(data = hospita$cost, alpha = 0.05, legend.loc = "topleft",
+         hill.type = "Hill", ylim = c(0, 2), main = "")
+title(main = "(a) Hill Plot", line = 3.3)
+### AltHill Plot
+hillplot(data = hospita$cost, alpha = 0.05, legend.loc = "topleft",
+         hill.type = "Hill", ylim = c(0, 2), x.theta = TRUE,
+         main = "")
+title(main = "(b) AltHill Plot", line = 3.3)
+### SmooHill Plot
+hillplot(data = hospita$cost, alpha = 0.05, legend.loc = "topleft",
+         hill.type = "SmooHill", ylim = c(0, 2), main = "")
+title(main = "(c) SmooHill Plot", line = 3.3)
+### AltSmooHill plot
+hillplot(data = hospita$cost, alpha = 0.05, legend.loc = "topleft",
+         hill.type = "SmooHill", ylim = c(0, 2), x.theta = TRUE,
+         main = "")
+title(main = "(d) AltSmooHill Plot", line = 3.3)
 
 ###################################### Tail index with Hill plot for general surgery ######################################
 
 ################### Code 17: Hill, AltHill, SmooHill and AltSmooHill for general surgery service
-### Hill, AltHill, SmooHill and AltSmooHill
-par(mfrow = c(2, 2))
-hillplot(data = surgery$cost, alpha = 0.05, legend.loc = "top",
-         hill.type = "Hill", ylim = c(0, 2))
-title(main = "(a)                   ", line = 3.3)
-hillplot(data = surgery$cost, alpha = 0.05, legend.loc = "top",
-         hill.type = "Hill", ylim = c(0, 2), x.theta = TRUE)
-title(main = "(b)                        ", line = 3.3)
-hillplot(data = surgery$cost, alpha = 0.05, legend.loc = "top",
-         hill.type = "SmooHill", ylim = c(0, 2), try.thresh = 
-           quantile(surgery$cost, c(0.9, 0.95), na.rm = TRUE))
-title(main = "(c)                             ", line = 3.3)
-hillplot(data = surgery$cost, alpha = 0.05, legend.loc = "top",
-         hill.type = "SmooHill", ylim = c(0, 2), x.theta = TRUE,
+par(mfrow = c(2, 2), cex = 0.7)
+### Hill Plot
+hillplot(data = surgery$cost, alpha = 0.05, legend.loc = "topleft",
+         hill.type = "Hill", ylim = c(0, 2), main = "")
+title(main = "(a) Hill Plot", line = 3.3)
+### AltHill Plot
+hillplot(data = surgery$cost, alpha = 0.05, legend.loc = "topleft",
+         hill.type = "Hill", ylim = c(0, 2), x.theta = TRUE,
+         main = "")
+title(main = "(b) AltHill Plot", line = 3.3)
+### SmooHill Plot
+hillplot(data = surgery$cost, alpha = 0.05, legend.loc = "topleft",
+         hill.type = "SmooHill", ylim = c(0, 2), main = "",
          try.thresh = quantile(surgery$cost, c(0.9, 0.95),
                                na.rm = TRUE))
-title(main = "(d)                                 ", line = 3.3)
+title(main = "(c) SmooHill Plot", line = 3.3)
+### AltSmooHill plot
+hillplot(data = surgery$cost, alpha = 0.05, legend.loc = "topleft",
+         hill.type = "SmooHill", ylim = c(0, 2), x.theta = TRUE,
+         main = "", try.thresh = quantile(surgery$cost,
+                                          c(0.9, 0.95), na.rm = TRUE))
+title(main = "(d) AltSmooHill Plot", line = 3.3)
 
 ###################################### Adjustment with spliced distributions for hospitalization ######################################
 
@@ -457,10 +483,10 @@ kable(cbind(data.frame(Dist = c("Empirical", "gammagdp", "normgdp",
   kable_styling(latex_options = c("striped", "hold_position")) 
 
 ################### Code 20: Adjustment of cumulative individual costs of hospitalization services with spliced distributions
+par(mfrow = c(1, 1))
 FnXh <- ecdf(hospita$cost)
 sortXh <- sort(hospita$cost)
 ### Empirical vs Theorical cumulative distribution function
-par(mfrow = c(1,1))
 plot(FnXh, lwd = 3,
      xlab = "Sample quantiles of individual costs of hospitalization", 
      main = "Adjustment cumulative individual costs of hospitalization")
@@ -483,7 +509,7 @@ legend("bottomright", lty = 1, col = c("black", "blue", "red",
                                                             "Weibull-Generalized Pareto"), lwd = 2)
 
 
-################### Code 21: Adjustment of log-survival distribution of hospitalization with spliced istributions
+################### Code 21: Adjustment of log-survival distribution of hospitalization with spliced distributions
 ### Empirical vs Theorical log-survival distribution function
 survXh <- 1 - FnXh(sortXh)
 plot(x = log(sortXh), y = log(survXh), lwd = 3,
@@ -690,10 +716,10 @@ kable(cbind(data.frame(Dist = c("Empirical", "gammagdp", "normgdp",
   kable_styling(latex_options = c("striped", "hold_position"))  
 
 ################### Code 26: Adjustment of cumulative individual costs of general surgery services with spliced distributions
+par(mfrow = c(1,1))
 FnXs <- ecdf(surgery$cost)
 sortXs <- sort(surgery$cost)
 ### Empirical vs Theorical cumulative distribution function
-par(mfrow = c(1,1))
 plot(FnXs, lwd = 3,
      xlab = "Sample quantiles of individual costs of general surgery", 
      main = "Adjustment cumulative individual costs of general surgery")
@@ -843,6 +869,7 @@ kable(cbind(data.frame(Dist = c("gammagpd", "normgpd", "weibullgpd")),
 
 ################### Code 30: Estimation of the tail index for hospitalization services
 ### Density function
+par(mfrow = c(1,1))
 fhosp <- function(x) dweibullgpd(x, wshape = SpHfit3$wshape, 
                                  wscale = SpHfit3$wscale, sigmau = SpHfit3$sigmau,
                                  u = SpHfit3$u, xi = SpHfit3$xi, phiu = SpHfit3$phiu)
@@ -851,9 +878,8 @@ Fhosp <- function(x) pweibullgpd(x, wshape = SpHfit3$wshape,
                                  wscale = SpHfit3$wscale, sigmau = SpHfit3$sigmau,
                                  u = SpHfit3$u, xi = SpHfit3$xi, phiu = SpHfit3$phiu)
 ### Equation to calculate the tail index
-par(mfrow = c(1, 1))
 tailindexH <- function(x) (1-Fhosp(x))/(x * fhosp(x))
-curve(expr = tailindexH, from = 1, to = 350, ylim = c(0,2),
+curve(expr = tailindexH, from = 1, to = 320, ylim = c(0,1),
       ylab = "Limit", xlab = "x", mgp=c(2.5,1,0), lwd = 2,
       main = "Estimation of the tail index for hospitalization
 services") 
@@ -867,27 +893,27 @@ FquantileH <- function(kappa) qweibullgpd(p = quantileH(kappa),
 correctionH <- MeanXhSpW * (MeanNhGPO + (VariNhGPO / MeanNhGPO) - 1)
 VaRH <- function(kappa) FquantileH(kappa) + correctionH
 
-curve(expr = VaRH, from = 0.90, to = 1, 
+curve(expr = VaRH, from = 0.90, to = 0.999, 
       ylab = "Value at Risk (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
       main = "Value at Risk for hospitalization services")
-rect(xleft = 0.95, ybottom = VaRH(0.95) + 15, xright = 0.95,
+rect(xleft = 0.95, ybottom = VaRH(0.95) + 9, xright = 0.95,
      ytop = VaRH(0.95), lwd = 2, border = "red")
-rect(xleft = 0.99, ybottom = VaRH(0.99) + 15, xright = 0.99,
+rect(xleft = 0.99, ybottom = VaRH(0.99) + 9, xright = 0.99,
      ytop = VaRH(0.99), lwd = 2, border = "red")
 points(x = c(0.95, 0.99), y = c(VaRH(0.95), VaRH(0.99)),
        pch = 19, col = "red", cex = 1.2)
-legend(x = 0.94, y = VaRH(0.95) + 30, bty = "n",
+legend(x = 0.94, y = VaRH(0.95) + 15, bty = "n",
        legend = round(VaRH(0.95), 3))
-legend(x = 0.98, y = VaRH(0.99) + 30, bty = "n", 
+legend(x = 0.98, y = VaRH(0.99) + 15, bty = "n", 
        legend = round(VaRH(0.99), 3))
 
 ################### Code 32: Tail Value at Risk for hospitalization services
-TVaRH <- function(kappa) (1/(1-kappa)) * as.numeric(integrate(
-         f = VaRH, lower = kappa, upper = 1)$value)
+TVaRH <- function(kappa) (1/(1-kappa)) * as.numeric(integrate(f = VaRH,
+                                                              lower = kappa, upper = 1)$value)
 TVaRH <- Vectorize(TVaRH)
 
-curve(expr = TVaRH, from = 0.90, to = 1, 
+curve(expr = TVaRH, from = 0.90, to = 0.999, 
       ylab = "Tail Value at Risk (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
       main = "Tail Value at Risk for hospitalization services")
@@ -905,7 +931,7 @@ legend(x = 0.98, y = TVaRH(0.99) + 15, bty = "n",
 ################### Code 33: Expected Shortfall for hospitalization services
 ESH <- function(kappa) (1 - kappa)*(TVaRH(kappa) - VaRH(kappa))
 
-curve(expr = ESH, from = 0.90, to = 1, 
+curve(expr = ESH, from = 0.90, to = 0.999, 
       ylab = "Expected Shortfall (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
       main = "Expected Shortfall for hospitalization services")
@@ -933,17 +959,17 @@ Fsurg <- function(x) pweibullgpd(x, wshape = SpSfit3$wshape,
                                  u = SpSfit3$u, xi = SpSfit3$xi, phiu = SpSfit3$phiu)
 ### Equation to calculate the tail index
 tailindexS <- function(x) (1-Fsurg(x))/(x * fsurg(x))
-curve(expr = tailindexS, from = 1, to = 5e11, ylim = c(0.8,1),
+curve(expr = tailindexS, from = 1, to = 4e11, ylim = c(0.80,0.90),
       ylab = "Limit", xlab = "x", mgp=c(2.5,1,0), lwd = 2,
       main = "Estimation of the tail index for general surgery
 services") 
-abline(h = tailindexS(1e11), col = "red")
-rect(xleft = 5e10, ybottom = tailindexS(1e11), xright = 5e10,
-     ytop = tailindexS(1e11) + 0.02, lwd = 2, border = "red")
-points(x = 5e10, y = tailindexS(1e11),
+abline(h = tailindexS(0.9e11), col = "red")
+rect(xleft = 5e10, ybottom = tailindexS(0.9e11), xright = 5e10,
+     ytop = tailindexS(0.9e11) + 0.02, lwd = 2, border = "red")
+points(x = 5e10, y = tailindexS(0.9e11),
        pch = 19, col = "red", cex = 1.2)
-legend(x = 1.2e10, y = tailindexS(1e11) + 0.04, bty = "n",
-       legend = round(tailindexS(1e11), 3))
+legend(x = 1.2e10, y = tailindexS(0.9e11) + 0.032, bty = "n",
+       legend = round(tailindexS(0.9e11), 3))
 
 ################### Code 35: Value at Risk for general surgery services
 quantileS <- function(kappa) 1 - ((1 - kappa) / MeanNsDEL)
@@ -951,7 +977,7 @@ FquantileS <- function(kappa) qweibullgpd(p = quantileS(kappa),
                                           wshape = SpSfit3$wshape, wscale = SpSfit3$wscale,
                                           sigmau = SpSfit3$sigmau, u = SpSfit3$u, xi = SpSfit3$xi,
                                           phiu = SpSfit3$phiu)
-correctionS <- MeanXhSpW * (MeanNsDEL + (VariNsDEL / MeanNsDEL) - 1)
+correctionS <- MeanXsSpW * (MeanNsDEL + (VariNsDEL / MeanNsDEL) - 1)
 VaRS <- function(kappa) FquantileS(kappa) + correctionS
 
 curve(expr = VaRS, from = 0.90, to = 0.999, 
@@ -971,7 +997,7 @@ legend(x = 0.98, y = VaRS(0.99) + 1700, bty = "n",
 
 ################### Code 36: Tail Value at Risk for general surgery services
 TVaRS <- function(kappa) (1/(1-kappa)) * as.numeric(integrate(
-         f = VaRS, lower = kappa, upper = 1)$value)
+  f = VaRS, lower = kappa, upper = 1)$value)
 TVaRS <- Vectorize(TVaRS)
 
 curve(expr = TVaRS, from = 0.90, to = 0.999, 
@@ -1010,13 +1036,14 @@ legend(x = 0.982, y = ESS(0.99) - 8, bty = "n",
 ###################################### Optimum retention point estimation for hospitalization service ######################################
 
 ################### Code 38: Optimum retention point estimation for hospitalization service
-rho <- c(0.1, 0.2, 0.3, 0.5, 0.8, 1, 1.2, 1.5, 2, 3, 4, 5, 7, 10, 20, 50)
+rho <- c(0.1, 0.2, 0.3, 0.5, 0.8, 1, 1.2, 1.5, 2, 3, 4, 5, 7,
+         10, 20, 50)
 VaRTH <- function(rho, kappa) VaRH(kappa) + (1 + rho)*ESH(kappa)
 ResultH <- function(rho){
   kapparho <- 1 - 1/(1 + rho)
-  VaRHrho <- VaRH(kapparho)
-  DeltaHrho <- (1+rho)*ESH(kapparho)
-  VaRTHrho <- VaRTH(rho, kapparho)
+  VaRHrho <- round(VaRH(kapparho), 3)
+  DeltaHrho <- round((1+rho)*ESH(kapparho), 3)
+  VaRTHrho <- round(VaRTH(rho, kapparho), 3)
   return(c(rho, kapparho, VaRHrho, DeltaHrho, VaRTHrho))
 }
 
@@ -1038,9 +1065,9 @@ kable(cbind(data.frame(tableH)), escape = FALSE,
 VaRTS <- function(rho, kappa) VaRS(kappa) + (1 + rho)*ESS(kappa)
 ResultS <- function(rho){
   kapparho <- 1 - 1/(1 + rho)
-  VaRSrho <- VaRS(kapparho)
-  DeltaSrho <- (1+rho)*ESS(kapparho)
-  VaRTSrho <- VaRTS(rho, kapparho)
+  VaRSrho <- round(VaRS(kapparho), 3)
+  DeltaSrho <- round((1+rho)*ESS(kapparho), 3)
+  VaRTSrho <- round(VaRTS(rho, kapparho), 3)
   return(c(rho, kapparho, VaRSrho, DeltaSrho, VaRTSrho))
 }
 
@@ -1056,300 +1083,9 @@ kable(cbind(data.frame(tableS)), escape = FALSE,
   kable_styling(latex_options = c("striped", "hold_position"),
                 position = "center") 
 
-###################################### Premium approximation through Black-Scholes model for hospitalization services ######################################
-
-################### Code 40: Adjustment for hospitalization services with Log-Normal distribution
-### The adjustment with gamlss is made
-LNHfit <- gamlssML(formula = hospita$cost, family = LOGNO)
-### Mean
-MeanXhLN <- moments(k = 1, dist = "LOGNO", domain = "realplus", 
-                    param = c(mu = LNHfit$mu, sigma = LNHfit$sigma))
-
-par(mai=rep(0.5, 4))
-layout(matrix(c(1,1, 2,2, 0, 3,3, 0), ncol = 4, byrow = TRUE))
-### Empirical vs Theorical cumulative distribution function
-FnXh <- ecdf(hospita$cost)
-sortXh <- sort(hospita$cost)
-plot(FnXh, lwd = 3,
-     xlab = "Sample quantiles of individual costs of hospitalization", 
-     main = "(a) Adjustment cumulative individual costs 
-     of hospitalization with Log-Normal",
-     mgp=c(2, 1, 0))
-
-fitXhL <- pLOGNO(q = sortXh, mu = LNHfit$mu, sigma = LNHfit$sigma)
-lines(sortXh, fitXhL, lwd = 3, lty = 4, col = "red")
-grid()
-legend("bottomright", lty = 1, col = c("black", "red"),
-       legend = c("Cumulative empirical distribution",
-                  "Log-Normal"), lwd = 2)
-### Empirical vs Theorical log-survival distribution function
-survXh <- 1 - FnXh(sortXh)
-plot(x = log(sortXh), y = log(survXh), lwd = 3,
-     xlab = "log(Sample quantiles of individual cost of
-     hospitalization)", ylab = "log(1 - Fn(x))", 
-     main = "(b) Adjustment of log-survival distribution 
-     of hospitalization with Log-Normal", type = "l")
-survXhL <- 1 - fitXhL
-lines(log(sortXh), log(survXhL), lwd = 3, col = "red", lty = 2)
-grid()
-legend("bottomleft", lty = 1, col = c("black", "red"),
-       legend = c("Cumulative empirical distribution",
-                  "Log-Normal"), lwd = 2)
-### QQ-plot 
-par(mgp=c(2, 1, 0))
-qqPlot(x = hospita$cost, lwd = 1, distribution = "LOGNO",
-       mu = LNHfit$mu, sigma = LNHfit$sigma, cex = 1, col.lines = "red",
-       xlab = "Theorical Quantiles", ylab = "Sample Quantiles",
-       main = "(c) Log-Normal", id = FALSE, ylim = c(0, 500))
-
-###################################### Premium approximation through Black-Scholes model for hospitalization services ######################################
-
-################### Code 41: Risk measures for hospitalization services with Log-Normal distribution
-### Density function
-fhospL <- function(x) dLOGNO(x, mu = LNHfit$mu, sigma = LNHfit$sigma)
-### Cumulative function
-FhospL <- function(x) pLOGNO(x, mu = LNHfit$mu, sigma = LNHfit$sigma)
-### Equation to calculate the tail index
-tailindexHL <- function(x) (1-FhospL(x))/(x * fhospL(x))
-### Value at Risk
-quantileHL <- function(kappa) 1 - ((1 - kappa) / MeanNhGPO)
-FquantileHL <- function(kappa) qLOGNO(p = quantileHL(kappa), mu = LNHfit$mu,
-                                      sigma = LNHfit$sigma)
-correctionHL <- MeanXhLN * (MeanNhGPO + (VariNhGPO / MeanNhGPO) - 1)
-VaRHL <- function(kappa) FquantileHL(kappa) + correctionHL
-### Tail Value at Risk
-TVaRHL <- function(kappa) (1/(1-kappa)) * as.numeric(integrate(f = VaRHL,
-                                                               lower = kappa, upper = 1)$value)
-TVaRHL <- Vectorize(TVaRHL)
-### Expected Shortfall
-ESHL <- function(kappa) (1 - kappa)*(TVaRHL(kappa) - VaRHL(kappa))
-
-### Plots
-par(mai=rep(0.5, 4), mfrow = c(2,2))
-curve(expr = tailindexHL, from = 1, to = 4e5, ylim = c(0,2),
-      ylab = "Limit", xlab = "x", mgp=c(2,1,0), lwd = 2,
-      main = "(a) Estimation of the tail index for hospitalization
-      services with Log-Normal distribution", cex.main = 0.9) 
-
-curve(expr = VaRHL, from = 0.90, to = 1, 
-      ylab = "Value at Risk (in millions of pesos)",
-      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "(b) Value at Risk for hospitalization services
-      with Log-Normal distribution", 
-      mgp=c(2,1,0), cex.main = 0.9)
-rect(xleft = 0.95, ybottom = VaRHL(0.95) + 300, xright = 0.95,
-     ytop = VaRHL(0.95), lwd = 2, border = "red")
-rect(xleft = 0.99, ybottom = VaRHL(0.99) + 300, xright = 0.99,
-     ytop = VaRHL(0.99), lwd = 2, border = "red")
-points(x = c(0.95, 0.99), y = c(VaRHL(0.95), VaRHL(0.99)),
-       pch = 19, col = "red", cex = 1.2)
-legend(x = 0.93, y = VaRHL(0.95) + 650, bty = "n",
-       legend = round(VaRHL(0.95), 3))
-legend(x = 0.97, y = VaRHL(0.99) + 650, bty = "n", 
-       legend = round(VaRHL(0.99), 3))
-
-curve(expr = TVaRHL, from = 0.90, to = 0.9999, 
-      ylab = "Tail Value at Risk (in millions of pesos)",
-      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "(c) Tail Value at Risk for hospitalization services
-with Log-Normal distribution", cex.main = 0.9)
-rect(xleft = 0.95, ybottom = TVaRHL(0.95) + 800, xright = 0.95,
-     ytop = TVaRHL(0.95), lwd = 2, border = "red")
-rect(xleft = 0.99, ybottom = TVaRHL(0.99) + 800, xright = 0.99,
-     ytop = TVaRHL(0.99), lwd = 2, border = "red")
-points(x = c(0.95, 0.99), y = c(TVaRHL(0.95), TVaRHL(0.99)),
-       pch = 19, col = "red", cex = 1.2)
-legend(x = 0.93, y = TVaRHL(0.95) + 1850, bty = "n",
-       legend = round(TVaRHL(0.95), 3))
-legend(x = 0.97, y = TVaRHL(0.99) + 1850, bty = "n", 
-       legend = round(TVaRHL(0.99), 3))
-
-curve(expr = ESHL, from = 0.90, to = 0.9999, 
-      ylab = "Expected Shortfall (in millions of pesos)",
-      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "(d) Expected Shortfall for hospitalization services
-with Log-Normal distribution", cex.main = 0.9)
-rect(xleft = 0.95, ybottom = ESHL(0.95) + 5, xright = 0.95,
-     ytop = ESHL(0.95), lwd = 2, border = "red")
-rect(xleft = 0.99, ybottom = ESHL(0.99) + 5, xright = 0.99,
-     ytop = ESHL(0.99), lwd = 2, border = "red")
-points(x = c(0.95, 0.99), y = c(ESHL(0.95), ESHL(0.99)),
-       pch = 19, col = "red", cex = 1.2)
-legend(x = 0.935, y = ESHL(0.95) + 10.3, bty = "n",
-       legend = round(ESHL(0.95), 3))
-legend(x = 0.975, y = ESHL(0.99) + 10.3, bty = "n", 
-       legend = round(ESHL(0.99), 3))
-
-################### Code 42: Optimum retention point estimation for hospitalization service with Log-Normal distribution
-VaRTHL <- function(rho, kappa) VaRHL(kappa) + (1 + rho)*ESHL(kappa)
-ResultHL <- function(rho){
-  kapparho <- 1 - 1/(1 + rho)
-  VaRHLrho <- VaRHL(kapparho)
-  DeltaHLrho <- (1+rho)*ESHL(kapparho)
-  VaRTHLrho <- VaRTHL(rho, kapparho)
-  return(c(rho, kapparho, VaRHLrho, DeltaHLrho, VaRTHLrho))
-}
-
-tableHL <- round(t(sapply(X = rho, FUN = ResultHL)), 6)
-
-kable(cbind(data.frame(tableHL)), escape = FALSE,
-      col.names = c("$\\rho$", "$\\kappa_{\\rho^*}$",
-                    "$M_{hosp}^*$", "$\\delta(M_{hosp}^*)$",
-                    "$VaR_{T_{hosp}}(\\kappa_{\\rho^*})$"),
-      caption = "Optimum retention point estimation for
-      hospitalization services with Log-Normal distribution
-      \\label{tab:retentionHL}",
-      "latex", booktabs = T) %>%
-  kable_styling(latex_options = c("striped", "hold_position"),
-                position = "center") 
-
-###################################### Premium approximation through Black-Scholes model for general surgery services ######################################
-
-################### Code 43: Adjustment for general surgery services with Log-Normal distribution
-### The adjustment with evmix is made
-LNSfit <- gamlssML(formula = surgery$cost, family = LOGNO)
-### Mean
-MeanXsLN <- moments(k = 1, dist = "LOGNO", domain = "realplus", 
-                    param = c(mu = LNSfit$mu, sigma = LNSfit$sigma))
-
-par(mai=rep(0.5, 4))
-layout(matrix(c(1,1, 2,2, 0, 3,3, 0), ncol = 4, byrow = TRUE))
-### Empirical vs Theorical cumulative distribution function
-FnXh <- ecdf(surgery$cost)
-sortXh <- sort(surgery$cost)
-plot(FnXh, lwd = 3,
-     xlab = "Sample quantiles of individual costs of general surgery", 
-     main = "(a) Adjustment cumulative individual costs of
-general surgery with Log-Normal", mgp=c(2,1,0))
-
-fitXhL <- pLOGNO(q = sortXh, mu = LNSfit$mu, sigma = LNSfit$sigma)
-lines(sortXh, fitXhL, lwd = 3, lty = 4, col = "red")
-grid()
-legend("bottomright", lty = 1, col = c("black", "red"),
-       legend = c("Cumulative empirical distribution",
-                  "Log-Normal"), lwd = 2)
-### Empirical vs Theorical log-survival distribution function
-survXh <- 1 - FnXh(sortXh)
-plot(x = log(sortXh), y = log(survXh), lwd = 3,
-     xlab = "log(Sample quantiles of individual cost of
-     general surgery)", ylab = "log(1 - Fn(x))", 
-     main = "(b) Adjustment of log-survival distribution
-of general sugery with Log-Normal", type = "l")
-survXhL <- 1 - fitXhL
-lines(log(sortXh), log(survXhL), lwd = 3, col = "red", lty = 2)
-
-grid()
-legend("bottomleft", lty = 1, col = c("black", "red"),
-       legend = c("Cumulative empirical distribution",
-                  "Log-Normal"), lwd = 2)
-### QQ-plot 
-par(mgp=c(2, 1, 0))
-qqPlot(x = surgery$cost, lwd = 1, distribution = "LOGNO",
-       mu = LNSfit$mu, sigma = LNSfit$sigma, cex = 1, col.lines = "red" ,
-       xlab = "Theorical Quantiles", ylab = "Sample Quantiles",
-       main = "(c) Log-Normal", id = FALSE, ylim = c(0, 500))
-
-################### Code 44: Risk measures for general surgery services with Log-Normal distribution
-### Density function
-fsurgL <- function(x) dLOGNO(x, mu = LNSfit$mu, sigma = LNSfit$sigma)
-### Cumulative function
-FsurgL <- function(x) pLOGNO(x, mu = LNSfit$mu, sigma = LNSfit$sigma)
-### Equation to calculate the tail index
-tailindexSL <- function(x) (1-FsurgL(x))/(x * fsurgL(x))
-### Value at Risk
-quantileSL <- function(kappa) 1 - ((1 - kappa) / MeanNsDEL)
-FquantileSL <- function(kappa) qLOGNO(p = quantileSL(kappa), mu = LNSfit$mu,
-                                      sigma = LNSfit$sigma)
-correctionSL <- MeanXsLN * (MeanNsDEL + (VariNsDEL / MeanNsDEL) - 1)
-VaRSL <- function(kappa) FquantileSL(kappa) + correctionSL
-### Tail Value at Risk
-TVaRSL <- function(kappa) (1/(1-kappa)) * as.numeric(integrate(f = VaRSL,
-                                                               lower = kappa, upper = 1)$value)
-TVaRSL <- Vectorize(TVaRSL)
-### Expected Shortfall
-ESSL <- function(kappa) (1 - kappa)*(TVaRSL(kappa) - VaRSL(kappa))
-
-### Plots
-par(mai=rep(0.5, 4), mfrow = c(2,2))
-curve(expr = tailindexSL, from = 1, to = 4e5, ylim = c(0,2),
-      ylab = "Limit", xlab = "x", mgp=c(2,1,0), lwd = 2,
-      main = "(a) Estimation of the tail index for general surgery
-      services with Log-Normal distribution", cex.main = 0.9) 
-
-curve(expr = VaRSL, from = 0.90, to = 1, 
-      ylab = "Value at Risk (in millions of pesos)",
-      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "(b) Value at Risk for general surgery services
-      with Log-Normal distribution", cex.main = 0.9)
-rect(xleft = 0.95, ybottom = VaRSL(0.95) + 300, xright = 0.95,
-     ytop = VaRSL(0.95), lwd = 2, border = "red")
-rect(xleft = 0.99, ybottom = VaRSL(0.99) + 300, xright = 0.99,
-     ytop = VaRSL(0.99), lwd = 2, border = "red")
-points(x = c(0.95, 0.99), y = c(VaRSL(0.95), VaRSL(0.99)),
-       pch = 19, col = "red", cex = 1.2)
-legend(x = 0.93, y = VaRSL(0.95) + 450, bty = "n",
-       legend = round(VaRSL(0.95), 3))
-legend(x = 0.97, y = VaRSL(0.99) + 450, bty = "n", 
-       legend = round(VaRSL(0.99), 3))
-
-curve(expr = TVaRSL, from = 0.90, to = 0.9999, 
-      ylab = "Tail Value at Risk (in millions of pesos)",
-      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "(c) Tail Value at Risk for general surgery services
-with Log-Normal distribution", cex.main = 0.9)
-rect(xleft = 0.95, ybottom = TVaRSL(0.95) + 600, xright = 0.95,
-     ytop = TVaRSL(0.95), lwd = 2, border = "red")
-rect(xleft = 0.99, ybottom = TVaRSL(0.99) + 600, xright = 0.99,
-     ytop = TVaRSL(0.99), lwd = 2, border = "red")
-points(x = c(0.95, 0.99), y = c(TVaRSL(0.95), TVaRSL(0.99)),
-       pch = 19, col = "red", cex = 1.2)
-legend(x = 0.93, y = TVaRSL(0.95) + 1200, bty = "n",
-       legend = round(TVaRSL(0.95), 3))
-legend(x = 0.97, y = TVaRSL(0.99) + 1200, bty = "n", 
-       legend = round(TVaRSL(0.99), 3))
-
-curve(expr = ESSL, from = 0.90, to = 0.9999, 
-      ylab = "Expected Shortfall (in millions of pesos)",
-      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "(d) Expected Shortfall for general surgery services
-with Log-Normal distribution", cex.main = 0.9)
-rect(xleft = 0.95, ybottom = ESSL(0.95) + 2, xright = 0.95,
-     ytop = ESSL(0.95), lwd = 2, border = "red")
-rect(xleft = 0.99, ybottom = ESSL(0.99) + 2, xright = 0.99,
-     ytop = ESSL(0.99), lwd = 2, border = "red")
-points(x = c(0.95, 0.99), y = c(ESSL(0.95), ESSL(0.99)),
-       pch = 19, col = "red", cex = 1.2)
-legend(x = 0.933, y = ESSL(0.95) + 4.5, bty = "n",
-       legend = round(ESSL(0.95), 3))
-legend(x = 0.975, y = ESSL(0.99) + 4.5, bty = "n", 
-       legend = round(ESSL(0.99), 3))
-
-################### Code 45: Optimum retention point estimation for general surgery service with Log-Normal distribution
-VaRTSL <- function(rho, kappa) VaRSL(kappa) + (1 + rho)*ESSL(kappa)
-ResultSL <- function(rho){
-  kapparho <- 1 - 1/(1 + rho)
-  VaRSLrho <- VaRSL(kapparho)
-  DeltaSLrho <- (1+rho)*ESSL(kapparho)
-  VaRTSLrho <- VaRTSL(rho, kapparho)
-  return(c(rho, kapparho, VaRSLrho, DeltaSLrho, VaRTSLrho))
-}
-
-tableSL <- round(t(sapply(X = rho, FUN = ResultSL)), 6)
-
-kable(cbind(data.frame(tableSL)), escape = FALSE,
-      col.names = c("$\\rho$", "$\\kappa_{\\rho^*}$",
-                    "$M_{surg}^*$", "$\\delta(M_{surg}^*)$",
-                    "$VaR_{T_{surg}}(\\kappa_{\\rho^*})$"),
-      caption = "Optimum retention point estimation for
-      general surgery services with Log-Normal distribution
-      \\label{tab:retentionSL}",
-      "latex", booktabs = T) %>%
-  kable_styling(latex_options = c("striped", "hold_position"),
-                position = "center") 
-
 ###################################### GAMLSS distributions to adjust severity distributions ######################################
 
-################### Code 46: Figure showing the shape of the tail for diferent types of GAMLSS distributions for $k_1; k_3; k_5$ = 1; 2, and $k_2; k_4; k_6$. Smaller values $i$ the $k$'s result heavier tails. Rigby et al. (2014)
+################### Code 40: Figure shows the tail shape for diferent types of GAMLSS distributions for $k_1, k_3, k_5 = 1, 2$, and $k_2, k_4, k_6 = 1,2$. Smaller values $i$ the $k$'s result heavier tails. Rigby et al. (2014)
 ### Types of distributions
 TypeI <- function(x, k1, k2) - k2 * log(abs(x))^k1
 TypeII <- function(x, k3, k4) - k4 * abs(x)^k3
@@ -1402,9 +1138,9 @@ lines(x = x, y = TypeII(x = x, k3 = 2, k4 = 2), type = "l",
 lines(x = x2, y = TypeI(x = x2, k1 = 2, k2 = 2), type = "l",
       col = "black", lwd = 2, lty = 1)
 
-###################################### GAMLSS distribution for hospitalization ######################################
+###################################### Adjustment of GAMLSS distributions for hospitalization services severities ######################################
 
-################### Code 47: Best fit with GAMLSS distributions for individual cost of hospitalization services
+################### Code 41: Best fit with GAMLSS distributions for individual cost of hospitalization
 ### The adjustment is made
 GdHfit1 <- fitDist(y = hospita$cost, type = "realplus")
 ### Estimation of second and third distribution with best fit
@@ -1417,8 +1153,7 @@ kable(rbind(GdHfit1$fits[1:5]),
       "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position"))
 
-
-################### Code 48: Statistical measurements of GAMLSS distributions for hospitalization services
+################### Code 42: Statistical measurements of GAMLSS distributions for hospitalization
 ### Estimation of mean, variance, skewness and excess kurtosis
 #### Mean
 MeanXhGdE <- mean(hospita$cost)
@@ -1479,10 +1214,11 @@ kable(cbind(data.frame(Dist = c("Empirical", "GG", "GB2",
       "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position")) 
 
-################### Code 49: Adjustment of cumulative individual costs of hospitalization services with GAMLSS distributions
+################### Code 43: Adjustment of cumulative individual costs of hospitalization services with GAMLSS distributions
 FnXh <- ecdf(hospita$cost)
 sortXh <- sort(hospita$cost)
 ### Empirical vs Theorical cumulative distribution function
+par(mfrow = c(1, 1))
 plot(FnXh, lwd = 3,
      xlab = "Sample quantiles of individual costs of hospitalization", 
      main = "Adjustment cumulative individual costs of hospitalization")
@@ -1501,7 +1237,7 @@ legend("bottomright", lty = 1, col = c("black", "blue", "red",
                                                             "Generalized Gamma", "Generalized Beta type 2",
                                                             "Box-Cox Power Exponential"), lwd = 2)
 
-################### Code 50: Adjustment of log-survival distribution of hospitalization with GAMLSS distributions
+################### Code 44: Adjustment of log-survival distribution of hospitalization with GAMLSS distributions
 ### Empirical vs Theorical log-survival distribution function
 survXh <- 1 - FnXh(sortXh)
 plot(x = log(sortXh), y = log(survXh), lwd = 3,
@@ -1521,7 +1257,7 @@ legend("bottomleft", lty = 1, col = c("black", "blue", "red", "green"),
                   "Generalized Beta type 2", "Box-Cox Power Exponential"),
        lwd = 2)
 
-################### Code 51: Q-Q plot GAMLSS distribution for hospitalization
+################### Code 45: Q-Q plot GAMLSS distribution for hospitalization services
 par(mai=rep(0.5, 4))
 layout(matrix(c(1,1, 2,2, 0, 3,3, 0), ncol = 4, byrow = TRUE))
 ### QQ-plot 
@@ -1541,7 +1277,7 @@ qqPlot(x = hospita$cost, lwd = 1, distribution = "BCPE",
        xlab = "Theorical Quantiles", ylab = "Sample Quantiles",
        main = "(c) Box-Cox Power Exponential Q-Q Plot", id = FALSE)
 
-################### Code 52: Goodness-of-fit tests for hospitalization services for GAMLSS
+################### Code 46: Goodness-of-fit tests for hospitalization services for GAMLSS
 ### Kolmogorov-Smirnov test
 set.seed(1248) # A seed is established so that the results can be replicated
 kolmGdXhGG <- ks.test(x = hospita$cost, distn =  "pGG", 
@@ -1613,14 +1349,126 @@ kable(cbind(data.frame(Dist = c("GG", "GB2", "BCPE")),
                                                                                                         adupGdXhGB2$p.value, adupGdXhBCPE$p.value), 
             "ad2up.test" = c(ad2upGdXhGG$p.value, 
                              ad2upGdXhGB2$p.value, ad2upGdXhBCPE$p.value)),
-      caption = "Goodness-of-fit tests hospitalization services
-      for GAMLSS distributions \\label{tab:gftGdXh}",
+      caption = "Goodness-of-fit tests for hospitalization services
+      with GAMLSS distributions \\label{tab:gftGdXh}",
       "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position"))
 
-###################################### GAMLSS distribution for general surgery ######################################
+###################################### Risk measures estimation for hospitalization services with GAMLSS ######################################
 
-################### Code 53: Best fit with GAMLSS distributions for individual cost of general surgery services
+################### Code 47: Tail index estimation for hospitalization services with GAMLSS
+### Density function
+par(mfrow = c(1, 1))
+fhospG <- function(x) dGB2(x, mu = GdHfit2$mu,
+                           sigma = GdHfit2$sigma, nu = GdHfit2$nu,
+                           tau = GdHfit2$tau)
+### Cumulative function
+FhospG <- function(x) pGB2(x, mu = GdHfit2$mu,
+                           sigma = GdHfit2$sigma, nu = GdHfit2$nu,
+                           tau = GdHfit2$tau)
+### Equation to calculate the tail index
+tailindexHG <- function(x) (1-FhospG(x))/(x * fhospG(x))
+curve(expr = tailindexHG, from = 1, to = 3600, ylim = c(0,0.2),
+      ylab = "Limit", xlab = "x", mgp=c(2.5,1,0), lwd = 2,
+      main = "Tail index estimation for hospitalization
+services") 
+
+################### Code 48: Risk measures for hospitalization services with GAMLSS
+par(mai=rep(0.5, 4))
+layout(matrix(c(1,1, 2,2, 0, 3,3, 0), ncol = 4, byrow = TRUE))
+
+### Value at Risk
+quantileHG <- function(kappa) 1 - ((1 - kappa) / MeanNhGPO)
+FquantileHG <- function(kappa) qGB2(quantileHG(kappa), mu = GdHfit2$mu,
+                                    sigma = GdHfit2$sigma, nu = GdHfit2$nu,
+                                    tau = GdHfit2$tau)
+correctionHG <- MeanXhGdGB2 * (MeanNhGPO + (VariNhGPO / MeanNhGPO) - 1)
+VaRHG <- function(kappa) FquantileHG(kappa) + correctionHG
+
+curve(expr = VaRHG, from = 0.90, to = 0.999, 
+      ylab = "Value at Risk (in millions of pesos)",
+      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
+      main = "(a) Value at Risk for hospitalization
+services with GAMLSS")
+rect(xleft = 0.95, ybottom = VaRHG(0.95) + 30, xright = 0.95,
+     ytop = VaRHG(0.95), lwd = 2, border = "red")
+rect(xleft = 0.99, ybottom = VaRHG(0.99) + 30, xright = 0.99,
+     ytop = VaRHG(0.99), lwd = 2, border = "red")
+points(x = c(0.95, 0.99), y = c(VaRHG(0.95), VaRHG(0.99)),
+       pch = 19, col = "red", cex = 1.2)
+legend(x = 0.935, y = VaRHG(0.95) + 65, bty = "n",
+       legend = round(VaRHG(0.95), 3))
+legend(x = 0.975, y = VaRHG(0.99) + 65, bty = "n", 
+       legend = round(VaRHG(0.99), 3))
+
+### Tail Value at Risk
+TVaRHG <- function(kappa) (1/(1-kappa)) * as.numeric(integrate(f = VaRHG,
+                                                               lower = kappa, upper = 1)$value)
+TVaRHG <- Vectorize(TVaRHG)
+
+curve(expr = TVaRHG, from = 0.90, to = 0.999, 
+      ylab = "Tail Value at Risk (in millions of pesos)",
+      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
+      main = "(b) Tail Value at Risk for hospitalization
+services with GAMLSS")
+rect(xleft = 0.95, ybottom = TVaRHG(0.95) + 30, xright = 0.95,
+     ytop = TVaRHG(0.95), lwd = 2, border = "red")
+rect(xleft = 0.99, ybottom = TVaRHG(0.99) + 30, xright = 0.99,
+     ytop = TVaRHG(0.99), lwd = 2, border = "red")
+points(x = c(0.95, 0.99), y = c(TVaRHG(0.95), TVaRHG(0.99)),
+       pch = 19, col = "red", cex = 1.2)
+legend(x = 0.935, y = TVaRHG(0.95) + 68, bty = "n",
+       legend = round(TVaRHG(0.95), 3))
+legend(x = 0.975, y = TVaRHG(0.99) + 68, bty = "n", 
+       legend = round(TVaRHG(0.99), 3))
+
+### Expected Shortfall
+ESHG <- function(kappa) (1 - kappa)*(TVaRHG(kappa) - VaRHG(kappa))
+
+curve(expr = ESHG, from = 0.90, to = 0.999, 
+      ylab = "Expected Shortfall (in millions of pesos)",
+      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
+      main = "(c) Expected Shortfall for hospitalization
+services with GAMLSS")
+rect(xleft = 0.95, ybottom = ESHG(0.95) + 0.6, xright = 0.95,
+     ytop = ESHG(0.95), lwd = 2, border = "red")
+rect(xleft = 0.99, ybottom = ESHG(0.99) + 0.6, xright = 0.99,
+     ytop = ESHG(0.99), lwd = 2, border = "red")
+points(x = c(0.95, 0.99), y = c(ESHG(0.95), ESHG(0.99)),
+       pch = 19, col = "red", cex = 1.2)
+legend(x = 0.938, y = ESHG(0.95) + 1.3, bty = "n",
+       legend = round(ESHG(0.95), 3))
+legend(x = 0.978, y = ESHG(0.99) + 1.3, bty = "n", 
+       legend = round(ESHG(0.99), 3))
+
+
+###################################### Optimum retention point estimation for hospitalization service with GAMLSS ######################################
+
+################### Code 49: Optimum retention point estimation for hospitalization service with GAMLSS
+VaRTHG <- function(rho, kappa) VaRHG(kappa) + (1 + rho)*ESHG(kappa)
+ResultHG <- function(rho){
+  kapparho <- 1 - 1/(1 + rho)
+  VaRHGrho <- round(VaRHG(kapparho), 3)
+  DeltaHGrho <- round((1+rho)*ESHG(kapparho), 3)
+  VaRTHGrho <- round(VaRTHG(rho, kapparho), 3)
+  return(c(rho, kapparho, VaRHGrho, DeltaHGrho, VaRTHGrho))
+}
+
+tableHG <- round(t(sapply(X = rho, FUN = ResultHG)), 6)
+
+kable(cbind(data.frame(tableHG)), escape = FALSE,
+      col.names = c("$\\rho$", "$\\kappa_{\\rho^*}$",
+                    "$M_{hosp}^*$", "$\\delta(M_{hosp}^*)$",
+                    "$VaR_{T_{hosp}}(\\kappa_{\\rho^*})$"),
+      caption = "Optimum retention point estimation for
+      hospitalization services with GAMLSS \\label{tab:retentionHG}",
+      "latex", booktabs = T) %>%
+  kable_styling(latex_options = c("striped", "hold_position"),
+                position = "center") 
+
+###################################### Adjustment of GAMLSS distributions for general surgery services severities ######################################
+
+################### Code 50: Best fit with GAMLSS distributions for individual cost of general surgery
 ### The adjustment is made
 GdSfit1 <- fitDist(y = surgery$cost, type = "realplus")
 ### Estimation of second and third distribution with best fit
@@ -1633,7 +1481,7 @@ kable(rbind(GdSfit1$fits[1:5]),
       "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position"))
 
-################### Code 54: Statistical measurements of GAMLSS distributions for general surgery services
+################### Code 51: Statistical measurements of GAMLSS distributions for general surgery
 ### Estimation of mean, variance, skewness and excess kurtosis
 #### Mean
 MeanXsGdE <- mean(surgery$cost)
@@ -1694,7 +1542,7 @@ kable(cbind(data.frame(Dist = c("Empirical", "GG", "BCPEo",
       "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position")) 
 
-################### Code 55: Adjustment of cumulative individual costs of general surgery services with GAMLSS distributions
+################### Code 52: Adjustment of cumulative individual costs of general surgery services with GAMLSS distributions
 FnXs <- ecdf(surgery$cost)
 sortXs <- sort(surgery$cost)
 ### Empirical vs Theorical cumulative distribution function
@@ -1718,8 +1566,7 @@ legend("bottomright", lty = 1, col = c("black", "blue", "red",
                                                             "Box-Cox Power Exponential-Original",
                                                             "Box-Cox Power Exponential", "Generalized Gamma"), lwd = 2)
 
-
-################### Code 56: Adjustment of log-survival distribution of general surgery with GAMLSS distributions
+################### Code 53: Adjustment of log-survival distribution of general surgery with GAMLSS distributions
 ### Empirical vs Theorical log-survival distribution function
 survXs <- 1 - FnXs(sortXs)
 plot(x = log(sortXs), y = log(survXs), lwd = 3,
@@ -1740,7 +1587,7 @@ legend("bottomleft", lty = 1, col = c("black", "blue", "red", "green"),
                   "Box-Cox Power Exponential", "Generalized Gamma"),
        lwd = 2)
 
-################### Code 57: Q-Q plot GAMLSS distribution for general surgery
+################### Code 54: Q-Q plot GAMLSS distribution for general surgery
 par(mai=rep(0.5, 4))
 layout(matrix(c(1,1, 2,2, 0, 3,3, 0), ncol = 4, byrow = TRUE))
 ### QQ-plot 
@@ -1760,7 +1607,7 @@ qqPlot(x = surgery$cost, lwd = 1, distribution = "GG",
        xlab = "Theorical Quantiles", ylab = "Sample Quantiles", 
        main = "(c) Generalized Gamma Q-Q Plot")
 
-################### Code 58: Goodness-of-fit tests for general surgery services for GAMLSS distributions
+################### Code 55: Goodness-of-fit tests for general surgery services for GAMLSS distributions
 set.seed(1248) # A seed is established so that the results can be replicated
 ### Kolmogorov-Smirnov test
 kolmGdXsBCPEo <- ks.test(x = surgery$cost, distn =  "pBCPEo", 
@@ -1832,14 +1679,127 @@ kable(cbind(data.frame(Dist = c("BCPEo", "BCPE", "GG")),
                                                                                                     adupGdXsBCPE$p.value, adupGdXsGG$p.value), "ad2up.test" =
               c(ad2upGdXsBCPEo$p.value, ad2upGdXsBCPE$p.value,
                 ad2upGdXsGG$p.value)),
-      caption = "Goodness-of-fit tests general surgery services for
-      GAMLSS distributions \\label{tab:gftGdXs}",
+      caption = "Goodness-of-fit tests for general surgery services
+      with GAMLSS distributions \\label{tab:gftGdXs}",
       "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position"))
 
-###################################### Comparison of adjustment between the spliced distribution and GAMLSS distribution for hospitalization ######################################
+###################################### Risk measures estimation for general surgery services with GAMLSS ######################################
 
-################### Code 59: Comparison of statistical measurements for hospitalization services
+################### Code 56: Tail index estimation for general surgery services with GAMLSS
+par(mfrow = c(1, 1))
+### Density function
+fsurgG <- function(x) dBCPEo(x, mu = GdSfit1$mu, 
+                             sigma = GdSfit1$sigma, nu = GdSfit1$nu,
+                             tau = GdSfit1$tau)
+### Cumulative function
+FsurgG <- function(x) pBCPEo(x, mu = GdSfit1$mu, 
+                             sigma = GdSfit1$sigma, nu = GdSfit1$nu,
+                             tau = GdSfit1$tau)
+
+### Equation to calculate the tail index
+tailindexSG <- function(x) (1-FsurgG(x))/(x * fsurgG(x))
+curve(expr = tailindexSG, from = 1, to = 3600, ylim = c(0,0.2),
+      ylab = "Limit", xlab = "x", mgp=c(2.5,1,0), lwd = 2,
+      main = "Tail index estimation for general surgery
+services with GAMLSS") 
+
+################### Code 57: Risk measures for general surgery services with GAMLSS
+par(mai=rep(0.5, 4))
+layout(matrix(c(1,1, 2,2, 0, 3,3, 0), ncol = 4, byrow = TRUE))
+
+### Value at Risk
+quantileSG <- function(kappa) 1 - ((1 - kappa) / MeanNsDEL)
+FquantileSG <- function(kappa) qBCPEo(quantileSG(kappa), mu = GdSfit1$mu, 
+                                      sigma = GdSfit1$sigma, nu = GdSfit1$nu,
+                                      tau = GdSfit1$tau)
+correctionSG <- MeanXsGdBCPEo * (MeanNsDEL + (VariNsDEL / MeanNsDEL) - 1)
+VaRSG <- function(kappa) FquantileSG(kappa) + correctionSG
+
+curve(expr = VaRSG, from = 0.90, to = 0.999, 
+      ylab = "Value at Risk (in millions of pesos)",
+      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
+      main = "Value at Risk for general surgery
+services with GAMLSS")
+rect(xleft = 0.95, ybottom = VaRSG(0.95) + 30, xright = 0.95,
+     ytop = VaRSG(0.95), lwd = 2, border = "red")
+rect(xleft = 0.99, ybottom = VaRSG(0.99) + 30, xright = 0.99,
+     ytop = VaRSG(0.99), lwd = 2, border = "red")
+points(x = c(0.95, 0.99), y = c(VaRSG(0.95), VaRSG(0.99)),
+       pch = 19, col = "red", cex = 1.2)
+legend(x = 0.94, y = VaRSG(0.95) + 50, bty = "n",
+       legend = round(VaRSG(0.95), 3))
+legend(x = 0.98, y = VaRSG(0.99) + 50, bty = "n", 
+       legend = round(VaRSG(0.99), 3))
+
+### Tail Value at Risk
+TVaRSG <- function(kappa) (1/(1-kappa)) * as.numeric(integrate(
+  f = VaRSG, lower = kappa, upper = 1)$value)
+TVaRSG <- Vectorize(TVaRSG)
+
+curve(expr = TVaRSG, from = 0.90, to = 0.999, 
+      ylab = "Tail Value at Risk (in millions of pesos)",
+      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
+      main = "Tail Value at Risk for general surgery
+services with GAMLSS")
+rect(xleft = 0.95, ybottom = TVaRSG(0.95) + 30, xright = 0.95,
+     ytop = TVaRSG(0.95), lwd = 2, border = "red")
+rect(xleft = 0.99, ybottom = TVaRSG(0.99) + 30, xright = 0.99,
+     ytop = TVaRSG(0.99), lwd = 2, border = "red")
+points(x = c(0.95, 0.99), y = c(TVaRSG(0.95), TVaRSG(0.99)),
+       pch = 19, col = "red", cex = 1.2)
+legend(x = 0.94, y = TVaRSG(0.95) + 52, bty = "n",
+       legend = round(TVaRSG(0.95), 3))
+legend(x = 0.98, y = TVaRSG(0.99) + 52, bty = "n", 
+       legend = round(TVaRSG(0.99), 3))
+
+### Expected Shortfall
+ESSG <- function(kappa) (1 - kappa)*(TVaRSG(kappa) - VaRSG(kappa))
+
+curve(expr = ESSG, from = 0.90, to = 0.999, 
+      ylab = "Expected Shortfall (in millions of pesos)",
+      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
+      main = "Expected Shortfall for general surgery
+services with GAMLSS")
+rect(xleft = 0.95, ybottom = ESSG(0.95) + 0.5, xright = 0.95,
+     ytop = ESSG(0.95), lwd = 2, border = "red")
+rect(xleft = 0.99, ybottom = ESSG(0.99) + 0.5, xright = 0.99,
+     ytop = ESSG(0.99), lwd = 2, border = "red")
+points(x = c(0.95, 0.99), y = c(ESSG(0.95), ESSG(0.99)),
+       pch = 19, col = "red", cex = 1.2)
+legend(x = 0.942, y = ESSG(0.95) + 0.85, bty = "n",
+       legend = round(ESSG(0.95), 3))
+legend(x = 0.982, y = ESSG(0.99) + 0.85, bty = "n", 
+       legend = round(ESSG(0.99), 3))
+
+
+###################################### Optimum retention point estimation for general surgery service with GAMLSS ######################################
+
+################### Code 58: Optimum retention point estimation for general surgery service with GAMLSS
+VaRTSG <- function(rho, kappa) VaRSG(kappa) + (1 + rho)*ESSG(kappa)
+ResultSG <- function(rho){
+  kapparho <- 1 - 1/(1 + rho)
+  VaRSGrho <- round(VaRSG(kapparho), 3)
+  DeltaSGrho <- round((1+rho)*ESSG(kapparho), 3)
+  VaRTSGrho <- round(VaRTSG(rho, kapparho), 3)
+  return(c(rho, kapparho, VaRSGrho, DeltaSGrho, VaRTSGrho))
+}
+
+tableSG <- round(t(sapply(X = rho, FUN = ResultSG)), 6)
+
+kable(cbind(data.frame(tableSG)), escape = FALSE,
+      col.names = c("$\\rho$", "$\\kappa_{\\rho^*}$",
+                    "$M_{surg}^*$", "$\\delta(M_{surg}^*)$",
+                    "$VaR_{T_{surg}}(\\kappa_{\\rho^*})$"),
+      caption = "Optimum retention point estimation for
+      general surgery services with GAMLSS \\label{tab:retentionSG}",
+      "latex", booktabs = T) %>%
+  kable_styling(latex_options = c("striped", "hold_position"),
+                position = "center") 
+
+###################################### Adjustment comparison between the spliced and GAMLSS distribution for hospitalization services ######################################
+
+################### Code 59: Statistical measurements comparison for hospitalization services
 kable(cbind(data.frame(Dist = c("Empirical", "weibullgpd", "GB2")),
             "Mean" = c(MeanXhGdE, unname(MeanXhSpW),
                        unname(MeanXhGdGB2)), "Variance" = c(VariXhGdE,
@@ -1847,14 +1807,14 @@ kable(cbind(data.frame(Dist = c("Empirical", "weibullgpd", "GB2")),
             "Skewness" = c(SkewXhGdE, unname(SkewXhSpW),
                            unname(SkewXhGdGB2)), "Excess Kurtosis" = c(KurtXhGdE,
                                                                        unname(KurtXhSpW), unname(KurtXhGdGB2))), 
-      caption = "Comparison of statistical measurements for
+      caption = "Statistical measurements comparison for
       hospitalization services \\label{tab:StatisticsCpXs}",
       "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position")) 
 
-################### Code 60: Comparison of adjustment of cumulative individual costs of hospitalization services
+################### Code 60: Adjustment comparison for cumulative individual costs of hospitalization services
+par(mfrow = c(1, 1))
 ### Empirical vs Theorical cumulative distribution function
-par(mfrow = c(1,1))
 plot(FnXh, lwd = 3,
      xlab = "Sample quantiles of individual costs of hospitalization", 
      main = "Adjustment cumulative individual costs of hospitalization")
@@ -1865,7 +1825,7 @@ legend("bottomright", lty = 1, col = c("black", "blue", "red"),
        lwd = 2, legend = c("Cumulative empirical distribution",
                            "Weibull-Generalized Pareto", "Generalized Beta type 2"))
 
-################### Code 61: Comparison of adjustment of log-survival costs of hospitalization services
+################### Code 61: Adjustment comparison for log-survival costs of hospitalization services
 ### Empirical vs Theorical log-survival distribution function
 plot(x = log(sortXh), y = log(survXh), lwd = 3,
      xlab = "log(Sample quantiles of individual cost of
@@ -1879,7 +1839,7 @@ legend("bottomleft", lty = 1, col = c("black", "blue", "red"),
        lwd = 2, legend = c("log-Survival Distribution",
                            "Weibull-Generalized Pareto", "Generalized Beta type 2"))
 
-################### Code 62: Comparison Q-Q plot for hospitalization services
+################### Code 62: Q-Q plot comparison for hospitalization services
 par(mfrow = c(2,1))
 ### QQ-plot 
 qqPlot(x = hospita$cost, lwd = 1, distribution = "weibullgpd",
@@ -1894,7 +1854,7 @@ qqPlot(x = hospita$cost, lwd = 1, distribution = "GB2",
        xlab = "Theorical Quantiles", ylab = "Sample Quantiles",
        main = "(b) Generalized Beta type 2 Q-Q Plot", id = FALSE)
 
-################### Code 63: Comparision goodness-of-fit tests for hospitalization services
+################### Code 63: Goodness-of-fit tests comparison for hospitalization services
 ### Results table
 kable(cbind(data.frame(Dist = c("weibullgpd", "GB2")),
             "ks.test" = c(kolmSpXhW$p.value, kolmGdXhGB2$p.value),
@@ -1902,15 +1862,77 @@ kable(cbind(data.frame(Dist = c("weibullgpd", "GB2")),
             "v.test" = c(kuipSpXhW$p.value, kuipGdXhGB2$p.value), 
             "adup.test" = c(adupSpXhW$p.value, adupGdXhGB2$p.value), 
             "ad2up.test" = c(ad2upSpXhW$p.value, ad2upGdXhGB2$p.value)),
-      caption = "Comparision goodness-of-fit tests hospitalization
+      caption = "Goodness-of-fit tests comparison for hospitalization
       services
       \\label{tab:gftCpXh}",
       "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position"))
 
-###################################### Comparison of adjustment between the spliced distribution and GAMLSS distribution for general surgery ######################################
+###################################### Risk measures comparison for hospitalization services ######################################
 
-################### Code 64: Comparison of statistical measurements for general surgery services
+################### Code 64: Risk measures comparison for hospitalization services
+par(mai=rep(0.5, 4))
+layout(matrix(c(1,1, 2,2, 0, 3,3, 0), ncol = 4, byrow = TRUE))
+### Value at Risk
+curve(expr = VaRH, from = 0.90, to = 0.999, 
+      ylab = "Value at Risk (in millions of pesos)",
+      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
+      main = "(a) Value at Risk comparison for
+hospitalization services", ylim = c(6250, 6750))
+curve(expr = VaRHG, from = 0.90, to = 0.999, add = T,
+      col = "blue", lwd = 2)
+
+legend("topleft", col = c("black", "blue"), lty = c(1, 1),
+       legend = c("Weibull-Generalized Pareto",
+                  "Generalized Beta Type II"), lwd = c(2, 2))
+
+### Tail Value at Risk
+curve(expr = TVaRH, from = 0.90, to = 0.999, 
+      ylab = "Tail Value at Risk (in millions of pesos)",
+      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
+      main = "(b) Tail Value at Risk comparison for
+hospitalization services", ylim = c(6250, 6750))
+curve(expr = TVaRHG, from = 0.90, to = 0.999, add = T,
+      col = "blue", lwd = 2)
+
+legend("topleft", col = c("black", "blue"), lty = c(1, 1),
+       legend = c("Weibull-Generalized Pareto",
+                  "Generalized Beta Type II"), lwd = c(2, 2))
+
+### Expected Shortfall
+curve(expr = ESH, from = 0.90, to = 0.999, 
+      ylab = "Expected Shortfall (in millions of pesos)",
+      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
+      main = "(c) Expected Shortfall comparison for
+hospitalization services", ylim = c(0, 5.2))
+curve(expr = ESHG, from = 0.90, to = 0.999, add = T,
+      col = "blue", lwd = 2)
+
+legend("topright", col = c("black", "blue"), lty = c(1, 1),
+       legend = c("Weibull-Generalized Pareto",
+                  "Generalized Beta Type II"), lwd = c(2, 2))
+
+###################################### Optimum retention point comparison for hospitalization services ######################################
+
+
+################### Code 65: Optimum retention point comparison for hospitalization services
+tableHC <- cbind(tableH[, 1:3], tableHG[, 3], tableH[, 4],
+                 tableHG[, 4])
+
+kable(cbind(data.frame(tableHC)), escape = FALSE,
+      col.names = c("$\\rho$", "$\\kappa_{\\rho^*}$",
+                    "$M_{hosp_{W-GP}}^*$", "$M_{hosp_{GB2}}^*$",
+                    "$\\delta(M_{hosp_{W-GP}}^*)$",
+                    "$\\delta(M_{hosp_{GB2}}^*)$"),
+      caption = "Optimum retention point comparison for
+      hospitalization services \\label{tab:retentionHC}",
+      "latex", booktabs = T) %>%
+  kable_styling(latex_options = c("striped", "hold_position"),
+                position = "center") 
+
+###################################### Adjustment comparison between the spliced and GAMLSS distribution for general surgery ######################################
+
+################### Code 66: Statistical measurements comparison for general surgery services
 kable(cbind(data.frame(Dist = c("Empirical", "weibullgpd",
                                 "BCPEo")), "Mean" = c(MeanXsGdE, unname(MeanXsSpW),
                                                       unname(MeanXsGdBCPEo)), "Variance" = c(round(VariXsGdE,
@@ -1919,14 +1941,14 @@ kable(cbind(data.frame(Dist = c("Empirical", "weibullgpd",
                            round(unname(SkewXsGdBCPEo), 6)), "Excess Kurtosis" =
               c(round(KurtXsGdE, 5), "does not exist", round(unname(
                 KurtXsGdBCPEo, 5)))), 
-      caption = "Comparison of statistical measurements for
+      caption = "Statistical measurements comparison for
       general surgery services \\label{tab:StatisticsCpXs}",
       "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position")) 
 
-################### Code 65: Comparison of adjustment of cumulative individual costs of general surgery services
+################### Code 67: Adjustment comparison for cumulative individual costs of general surgery services
+par(mfrow = c(1, 1))
 ### Empirical vs Theorical cumulative distribution function
-par(mfrow = c(1,1))
 plot(FnXs, lwd = 3,
      xlab = "Sample quantiles of individual costs of general surgery", 
      main = "Adjustment cumulative individual costs of general surgery")
@@ -1938,7 +1960,7 @@ legend("bottomright", lty = 1, col = c("black", "blue", "red"),
                            "Weibull-Generalized Pareto",
                            "Box-Cox Power Exponential-Original"))
 
-################### Code 66: Comparison of adjustment of log-survival costs of general surgery services
+################### Code 68: Adjustment comparison for log-survival costs of general surgery services
 ### Empirical vs Theorical log-survival distribution function
 plot(x = log(sortXs), y = log(survXs), lwd = 3,
      xlab = "log(Sample quantiles of individual cost of
@@ -1953,7 +1975,7 @@ legend("bottomleft", lty = 1, col = c("black", "blue", "red"),
                            "Weibull-Generalized Pareto",
                            "Box-Cox Power Exponential-Original"))
 
-################### Code 67: Comparison Q-Q plot for general surgery services
+################### Code 69: Q-Q plot comparison for general surgery services
 par(mfrow = c(2,1))
 ### QQ-plot 
 qqPlot(x = surgery$cost, lwd = 1, distribution = "weibullgpd",
@@ -1969,7 +1991,7 @@ qqPlot(x = surgery$cost, lwd = 1, distribution = "BCPEo",
        main = "(b) Box-Cox Power Exponential-Orig. Q-Q Plot",
        id = FALSE)
 
-################### Code 68: Comparision goodness-of-fit tests for general surgery services
+################### Code 70: Goodness-of-fit tests comparison for general surgery services
 ### Results table
 kable(cbind(data.frame(Dist = c("weibullgpd", "BCPEo")),
             "ks.test" = c(kolmSpXsW$p.value, kolmGdXsBCPEo$p.value),
@@ -1978,9 +2000,72 @@ kable(cbind(data.frame(Dist = c("weibullgpd", "BCPEo")),
             "adup.test" = c(adupSpXsW$p.value, adupGdXsBCPEo$p.value),   
             "ad2up.test" = c(ad2upSpXsW$p.value,
                              ad2upGdXsBCPEo$p.value)),
-      caption = "Comparision goodness-of-fit tests general surgery
+      caption = "Goodness-of-fit tests comparison for general surgery
       services 
       \\label{tab:gftCpXs}",
       "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position"))
+
+###################################### Risk measures comparison for general surgery services ######################################
+
+################### Code 71: Risk measures comparison for general surgery services
+par(mai=rep(0.5, 4))
+layout(matrix(c(1,1, 2,2, 0, 3,3, 0), ncol = 4, byrow = TRUE))
+### Value at Risk
+curve(expr = VaRS, from = 0.90, to = 0.999, 
+      ylab = "Value at Risk (in millions of pesos)",
+      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
+      main = "(a) Value at Risk comparison for
+general surgery services", ylim = c(1000, 3000))
+curve(expr = VaRSG, from = 0.90, to = 0.999, add = T,
+      col = "blue", lwd = 2)
+
+legend("topleft", col = c("black", "blue"), lty = c(1, 1),
+       legend = c("Weibull-Generalized Pareto",
+                  "Box-Cox Power Exponential-orig."), lwd = c(2, 2))
+
+### Tail Value at Risk
+curve(expr = TVaRS, from = 0.90, to = 0.999, 
+      ylab = "Tail Value at Risk (in millions of pesos)",
+      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
+      main = "(b) Tail Value at Risk comparison for
+general surgery services", ylim = c(1000, 10000))
+curve(expr = TVaRSG, from = 0.90, to = 0.999, add = T,
+      col = "blue", lwd = 2)
+
+legend("topleft", col = c("black", "blue"), lty = c(1, 1),
+       legend = c("Weibull-Generalized Pareto",
+                  "Box-Cox Power Exponential-orig."), lwd = c(2, 2))
+
+### Expected Shortfall
+curve(expr = ESS, from = 0.90, to = 0.999, 
+      ylab = "Expected Shortfall (in millions of pesos)",
+      xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
+      main = "(c) Expected Shortfall comparison for
+general surgery services", ylim = c(0, 80))
+curve(expr = ESSG, from = 0.90, to = 0.999, add = T,
+      col = "blue", lwd = 2)
+
+legend("left", col = c("black", "blue"), lty = c(1, 1),
+       legend = c("Weibull-Generalized Pareto",
+                  "Box-Cox Power Exponential-orig."), lwd = c(2, 2))
+
+###################################### Optimum retention point comparison for general surgery services ######################################
+
+
+################### Code 72: Optimum retention point comparison for hospitalization services
+tableSC <- cbind(tableS[, 1:3], tableSG[, 3], tableS[, 4],
+                 tableSG[, 4])
+
+kable(cbind(data.frame(tableSC)), escape = FALSE,
+      col.names = c("$\\rho$", "$\\kappa_{\\rho^*}$",
+                    "$M_{surg_{W-GP}}^*$", "$M_{surg{BCPEo}}^*$",
+                    "$\\delta(M_{surg_{W-GP}}^*)$",
+                    "$\\delta(M_{surg_{BCPEo}}^*)$"),
+      caption = "Optimum retention point comparison for
+      general surgery services \\label{tab:retentionSC}",
+      "latex", booktabs = T) %>%
+  kable_styling(latex_options = c("striped", "hold_position"),
+                position = "center") 
+
 
