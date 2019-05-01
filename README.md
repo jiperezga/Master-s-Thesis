@@ -1,1 +1,1 @@
-<embed src="https://github.com/jiperezga/Masters-Thesis/blob/master/Master's%20Tesis.pdf" />
+<embed src="https://sumanbogati.github.io/sample.pdf" type="application/pdf" />
