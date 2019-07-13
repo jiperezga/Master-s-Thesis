@@ -297,8 +297,8 @@ curve(pGPO(x, mu = FitN_surg3$mu, sigma = FitN_surg3$sigma),
 grid()
 legend("bottomright", lty = 1, col = c("black", "blue", "green",
                                        "red"), legend = c("Cumulative empirical distribution",
-                                                          "Poisson-Inverse Gaussian", "Generalized Poisson",
-                                                          "Negative Binomial type I"), lwd = 2)
+                                                          "Delaporte", "Poisson-Inverse Gaussian",
+                                                          "Generalized Poisson"), lwd = 2)
 
 ################### Code 13: Goodness-of-fit for tests general surgery frequencies
 set.seed(1248) # A seed is established so that the results can be replicated
@@ -908,15 +908,15 @@ legend(x = 0.94, y = VaRH(0.95) + 15, bty = "n",
 legend(x = 0.98, y = VaRH(0.99) + 15, bty = "n", 
        legend = round(VaRH(0.99), 3))
 
-################### Code 32: Tail Value at Risk for hospitalization services
+################### Code 32: Expected Shortfall for hospitalization services
 TVaRH <- function(kappa) (1/(1-kappa)) * as.numeric(integrate(f = VaRH,
                                                               lower = kappa, upper = 1)$value)
 TVaRH <- Vectorize(TVaRH)
 
 curve(expr = TVaRH, from = 0.90, to = 0.999, 
-      ylab = "Tail Value at Risk (in millions of pesos)",
+      ylab = "Expected Shortfall (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "Tail Value at Risk for hospitalization services")
+      main = "Expected Shortfall for hospitalization services")
 rect(xleft = 0.95, ybottom = TVaRH(0.95) + 8, xright = 0.95,
      ytop = TVaRH(0.95), lwd = 2, border = "red")
 rect(xleft = 0.99, ybottom = TVaRH(0.99) + 8, xright = 0.99,
@@ -928,13 +928,13 @@ legend(x = 0.94, y = TVaRH(0.95) + 15, bty = "n",
 legend(x = 0.98, y = TVaRH(0.99) + 15, bty = "n", 
        legend = round(TVaRH(0.99), 3))
 
-################### Code 33: Expected Shortfall for hospitalization services
+################### Code 33: Stop-Loss Premium for hospitalization services
 ESH <- function(kappa) (1 - kappa)*(TVaRH(kappa) - VaRH(kappa))
 
 curve(expr = ESH, from = 0.90, to = 0.999, 
-      ylab = "Expected Shortfall (in millions of pesos)",
+      ylab = "Stop-Loss Premium (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "Expected Shortfall for hospitalization services")
+      main = "Stop-Loss Premium for hospitalization services")
 rect(xleft = 0.95, ybottom = ESH(0.95) + 0.2, xright = 0.95,
      ytop = ESH(0.95), lwd = 2, border = "red")
 rect(xleft = 0.99, ybottom = ESH(0.99) + 0.2, xright = 0.99,
@@ -995,15 +995,15 @@ legend(x = 0.94, y = VaRS(0.95) + 1700, bty = "n",
 legend(x = 0.98, y = VaRS(0.99) + 1700, bty = "n", 
        legend = round(VaRS(0.99), 3))
 
-################### Code 36: Tail Value at Risk for general surgery services
+################### Code 36: Expected Shortfall for general surgery services
 TVaRS <- function(kappa) (1/(1-kappa)) * as.numeric(integrate(
   f = VaRS, lower = kappa, upper = 1)$value)
 TVaRS <- Vectorize(TVaRS)
 
 curve(expr = TVaRS, from = 0.90, to = 0.999, 
-      ylab = "Tail Value at Risk (in millions of pesos)",
+      ylab = "Expected Shortfall (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "Tail Value at Risk for general surgery services")
+      main = "Expected Shortfall for general surgery services")
 rect(xleft = 0.95, ybottom = TVaRS(0.95) + 10000, xright = 0.95,
      ytop = TVaRS(0.95), lwd = 2, border = "red")
 rect(xleft = 0.99, ybottom = TVaRS(0.99) + 10000, xright = 0.99,
@@ -1015,13 +1015,13 @@ legend(x = 0.94, y = TVaRS(0.95) + 15000, bty = "n",
 legend(x = 0.98, y = TVaRS(0.99) + 15000, bty = "n", 
        legend = round(TVaRS(0.99), 3))
 
-################### Code 37: Expected Shortfall for general surgery services
+################### Code 37: Stop-Loss Premium for general surgery services
 ESS <- function(kappa) (1 - kappa)*(TVaRS(kappa) - VaRS(kappa))
 
 curve(expr = ESS, from = 0.90, to = 0.999, 
-      ylab = "Expected Shortfall (in millions of pesos)",
+      ylab = "Stop-Loss Premium (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "Expected Shortfall for general surgery services")
+      main = "Stop-Loss Premium for general surgery services")
 rect(xleft = 0.95, ybottom = ESS(0.95) - 8, xright = 0.95,
      ytop = ESS(0.95), lwd = 2, border = "red")
 rect(xleft = 0.99, ybottom = ESS(0.99) - 8, xright = 0.99,
@@ -1401,15 +1401,15 @@ legend(x = 0.935, y = VaRHG(0.95) + 65, bty = "n",
 legend(x = 0.975, y = VaRHG(0.99) + 65, bty = "n", 
        legend = round(VaRHG(0.99), 3))
 
-### Tail Value at Risk
+### Expected Shortfall
 TVaRHG <- function(kappa) (1/(1-kappa)) * as.numeric(integrate(f = VaRHG,
                                                                lower = kappa, upper = 1)$value)
 TVaRHG <- Vectorize(TVaRHG)
 
 curve(expr = TVaRHG, from = 0.90, to = 0.999, 
-      ylab = "Tail Value at Risk (in millions of pesos)",
+      ylab = "Expected Shortfall (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "(b) Tail Value at Risk for hospitalization
+      main = "(b) Expected Shortfall for hospitalization
 services with GAMLSS")
 rect(xleft = 0.95, ybottom = TVaRHG(0.95) + 30, xright = 0.95,
      ytop = TVaRHG(0.95), lwd = 2, border = "red")
@@ -1422,13 +1422,13 @@ legend(x = 0.935, y = TVaRHG(0.95) + 68, bty = "n",
 legend(x = 0.975, y = TVaRHG(0.99) + 68, bty = "n", 
        legend = round(TVaRHG(0.99), 3))
 
-### Expected Shortfall
+### Stop-Loss Premium
 ESHG <- function(kappa) (1 - kappa)*(TVaRHG(kappa) - VaRHG(kappa))
 
 curve(expr = ESHG, from = 0.90, to = 0.999, 
-      ylab = "Expected Shortfall (in millions of pesos)",
+      ylab = "Stop-Loss Premium (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "(c) Expected Shortfall for hospitalization
+      main = "(c) Stop-Loss Premium for hospitalization
 services with GAMLSS")
 rect(xleft = 0.95, ybottom = ESHG(0.95) + 0.6, xright = 0.95,
      ytop = ESHG(0.95), lwd = 2, border = "red")
@@ -1732,15 +1732,15 @@ legend(x = 0.94, y = VaRSG(0.95) + 50, bty = "n",
 legend(x = 0.98, y = VaRSG(0.99) + 50, bty = "n", 
        legend = round(VaRSG(0.99), 3))
 
-### Tail Value at Risk
+### Expected Shortfall
 TVaRSG <- function(kappa) (1/(1-kappa)) * as.numeric(integrate(
   f = VaRSG, lower = kappa, upper = 1)$value)
 TVaRSG <- Vectorize(TVaRSG)
 
 curve(expr = TVaRSG, from = 0.90, to = 0.999, 
-      ylab = "Tail Value at Risk (in millions of pesos)",
+      ylab = "Expected Shortfall (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "Tail Value at Risk for general surgery
+      main = "Expected Shortfall for general surgery
 services with GAMLSS")
 rect(xleft = 0.95, ybottom = TVaRSG(0.95) + 30, xright = 0.95,
      ytop = TVaRSG(0.95), lwd = 2, border = "red")
@@ -1753,13 +1753,13 @@ legend(x = 0.94, y = TVaRSG(0.95) + 52, bty = "n",
 legend(x = 0.98, y = TVaRSG(0.99) + 52, bty = "n", 
        legend = round(TVaRSG(0.99), 3))
 
-### Expected Shortfall
+### Stop-Loss Premium
 ESSG <- function(kappa) (1 - kappa)*(TVaRSG(kappa) - VaRSG(kappa))
 
 curve(expr = ESSG, from = 0.90, to = 0.999, 
-      ylab = "Expected Shortfall (in millions of pesos)",
+      ylab = "Stop-Loss Premium (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "Expected Shortfall for general surgery
+      main = "Stop-Loss Premium for general surgery
 services with GAMLSS")
 rect(xleft = 0.95, ybottom = ESSG(0.95) + 0.5, xright = 0.95,
      ytop = ESSG(0.95), lwd = 2, border = "red")
@@ -1886,11 +1886,11 @@ legend("topleft", col = c("black", "blue"), lty = c(1, 1),
        legend = c("Weibull-Generalized Pareto",
                   "Generalized Beta Type II"), lwd = c(2, 2))
 
-### Tail Value at Risk
+### Expected Shortfall
 curve(expr = TVaRH, from = 0.90, to = 0.999, 
-      ylab = "Tail Value at Risk (in millions of pesos)",
+      ylab = "Expected Shortfall (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "(b) Tail Value at Risk comparison for
+      main = "(b) Expected Shortfall comparison for
 hospitalization services", ylim = c(6250, 6750))
 curve(expr = TVaRHG, from = 0.90, to = 0.999, add = T,
       col = "blue", lwd = 2)
@@ -1899,11 +1899,11 @@ legend("topleft", col = c("black", "blue"), lty = c(1, 1),
        legend = c("Weibull-Generalized Pareto",
                   "Generalized Beta Type II"), lwd = c(2, 2))
 
-### Expected Shortfall
+### Stop-Loss Premium
 curve(expr = ESH, from = 0.90, to = 0.999, 
-      ylab = "Expected Shortfall (in millions of pesos)",
+      ylab = "Stop-Loss Premium (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "(c) Expected Shortfall comparison for
+      main = "(c) Stop-Loss Premium comparison for
 hospitalization services", ylim = c(0, 5.2))
 curve(expr = ESHG, from = 0.90, to = 0.999, add = T,
       col = "blue", lwd = 2)
@@ -2024,11 +2024,11 @@ legend("topleft", col = c("black", "blue"), lty = c(1, 1),
        legend = c("Weibull-Generalized Pareto",
                   "Box-Cox Power Exponential-orig."), lwd = c(2, 2))
 
-### Tail Value at Risk
+### Expected Shortfall
 curve(expr = TVaRS, from = 0.90, to = 0.999, 
-      ylab = "Tail Value at Risk (in millions of pesos)",
+      ylab = "Expected Shortfall (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "(b) Tail Value at Risk comparison for
+      main = "(b) Expected Shortfall comparison for
 general surgery services", ylim = c(1000, 10000))
 curve(expr = TVaRSG, from = 0.90, to = 0.999, add = T,
       col = "blue", lwd = 2)
@@ -2037,11 +2037,11 @@ legend("topleft", col = c("black", "blue"), lty = c(1, 1),
        legend = c("Weibull-Generalized Pareto",
                   "Box-Cox Power Exponential-orig."), lwd = c(2, 2))
 
-### Expected Shortfall
+### Stop-Loss Premium
 curve(expr = ESS, from = 0.90, to = 0.999, 
-      ylab = "Expected Shortfall (in millions of pesos)",
+      ylab = "Stop-Loss Premium (in millions of pesos)",
       xlab = expression(kappa), mgp=c(2,1,0), lwd = 2,
-      main = "(c) Expected Shortfall comparison for
+      main = "(c) Stop-Loss Premium comparison for
 general surgery services", ylim = c(0, 80))
 curve(expr = ESSG, from = 0.90, to = 0.999, add = T,
       col = "blue", lwd = 2)
